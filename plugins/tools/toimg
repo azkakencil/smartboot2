@@ -1,0 +1,69 @@
+const fs = require('fs')
+const path = require('path')
+const { exec } = require('child_process')
+
+const pluginConfig = {
+  name: 'toimg',
+  alias: ['stiker2img', 'sticker2img'],
+  category: 'tools',
+  description: 'Convert sticker to image',
+  usage: '.toimg (reply sticker)',
+  cooldown: 3,
+  isEnabled: true,
+}
+
+async function handler(m, { sock }) {
+
+  const quoted = m.quoted
+
+  // =========================
+  // FIX DETEKSI STICKER (IMPORTANT)
+  // =========================
+  const isSticker =
+    quoted?.mtype === 'stickerMessage' ||
+    quoted?.message?.stickerMessage
+
+  if (!quoted || !isSticker) {
+    return m.reply('❌ Harus reply sticker dengan perintah *.toimg*')
+  }
+
+  const filePath = path.join('./tmp', `${Date.now()}.webp`)
+  const outPath = path.join('./tmp', `${Date.now()}.png`)
+
+  try {
+    const buffer = await quoted.download()
+
+    if (!buffer) {
+      return m.reply('❌ Gagal ambil sticker data')
+    }
+
+    fs.writeFileSync(filePath, buffer)
+
+    exec(`ffmpeg -i ${filePath} ${outPath}`, async (err) => {
+
+      if (err) {
+        console.log(err)
+        return m.reply('❌ Gagal convert (ffmpeg error)')
+      }
+
+      const img = fs.readFileSync(outPath)
+
+      await sock.sendMessage(m.chat, {
+        image: img,
+        caption: '✅ Sticker berhasil jadi gambar'
+      }, { quoted: m })
+
+      fs.unlinkSync(filePath)
+      fs.unlinkSync(outPath)
+    })
+
+  } catch (e) {
+    console.log(e)
+    return m.reply('❌ Error saat memproses sticker')
+  }
+}
+
+module.exports = {
+  config: pluginConfig,
+  handler
+}

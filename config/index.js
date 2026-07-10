@@ -4,15 +4,15 @@ const config = {
     version: "1.0.1",
     description: "WhatsApp Bot Powered by Baileys",
     developer: "SmartGadget Dev",
-    support: "https://wa.me/6283112243986",
-    number: "6283112243986",
+    support: "https://wa.me/6285713898339",
+    number: "6285713898339",
     prefix: ".",
   },
 
   session: {
     folderName: "session",
     usePairingCode: true,
-    pairingNumber: "6283112243986",
+    pairingNumber: "6285713898339",
     printQRInTerminal: false,
     maxReconnectAttempts: 10,
     reconnectInterval: 5000,
